@@ -1,6 +1,6 @@
 # Ractors
 
-<div align="center"><img src="https://raw.githubusercontent.com/negatic/ractors/refs/heads/main/docs/ractors.webp?token=GHSAT0AAAAAAC6Y6JQK5WPZORLUF6BN4CHUZ5N6KQQ" alt="Ractors Logo" width="250" height="250"></div>
+<div align="center"><img src="https://raw.githubusercontent.com/negatic/ractors/refs/heads/main/docs/ractors.webp" alt="Ractors Logo" width="250" height="250"></div>
 
 Ractors is a lightweight Python library designed for efficient array operations, leveraging Rust for enhanced performance. Our goal is to provide a comprehensive set of statistical tools that are faster and more efficient compared to existing alternatives.
 
