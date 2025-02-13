@@ -2,13 +2,12 @@ use pyo3::prelude::*;
 
 #[pyfunction]
 fn mean(numbers: Vec<f64>) -> f64 {
-    let sum: f64 = numbers.iter().sum();
-    let len = numbers.len() as f64;
-    if len == 0.0 {
-        0.0
-    } else {
-        sum/len
+    if numbers.is_empty() {
+        return 0.0;
     }
+ 
+    let sum: f64 = numbers.iter().sum();
+    sum / (numbers.len() as f64)
 }
 
 #[pymodule]
