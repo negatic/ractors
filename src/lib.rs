@@ -74,7 +74,7 @@ impl CSV {
         let file = std::fs::File::open(self.file_path.to_string()).unwrap();
         let reader = BufReader::new(file);
         let mut is_header = false;
-        let mut row_number = 0;
+        let mut _row_number = 0;
         let mut df = Dataframe::default();
 
         for row in reader.lines() {
@@ -88,7 +88,7 @@ impl CSV {
                 let pat = self.delimiter.to_string();
                 let row_data: Vec<String> = row.split(&pat).map(String::from).collect();
                 df.rows.push(row_data);
-                row_number += 1;
+                _row_number += 1;
             }
         }
         df
