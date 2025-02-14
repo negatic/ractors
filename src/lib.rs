@@ -1,7 +1,5 @@
-use csv::ReaderBuilder;
 use pyo3::prelude::*;
-use std::fs::File;
-use std::io::BufReader;
+use std::io::{BufRead, BufReader};
 
 #[pyfunction]
 fn mean(numbers: Vec<f64>) -> f64 {
@@ -46,55 +44,54 @@ fn std_dev(numbers: Vec<f64>) -> f64 {
 }
 
 #[pyclass]
+struct Dataframe {
+    columns: Vec<String>,
+    rows: Vec<Vec<String>>
+}
+#[pyclass]
 struct CSV {
     file_path: String,
-    has_headers: bool,
-    delimiter: u8,
+    delimiter: String,
+}
+
+impl Default for Dataframe {
+    fn default() -> Self {
+        Dataframe {
+            columns: Vec::new(),
+            rows: Vec::new()
+        }
+    }
 }
 
 #[pymethods]
 impl CSV {
     #[new]
-    fn new(file_path: String, has_headers: bool, delimiter: u8) -> Self {
-        CSV {
-            file_path,
-            has_headers,
-            delimiter,
-        }
+    fn new(file_path: String, delimiter: String) -> std::io::Result<Self> {
+        Ok(CSV { file_path, delimiter })
     }
 
-    fn open(&self, _py: Python) -> PyResult<Vec<Vec<String>>> {
-        let file = File::open(&self.file_path)
-            .map_err(|e| pyo3::exceptions::PyIOError::new_err(e.to_string()))?;
-        let mut reader = ReaderBuilder::new()
-            .has_headers(self.has_headers)
-            .delimiter(self.delimiter)
-            .from_reader(BufReader::new(file));
+    fn read(&mut self) -> Dataframe {
+        let file = std::fs::File::open(self.file_path.to_string()).unwrap();
+        let reader = BufReader::new(file);
+        let mut is_header = false;
+        let mut row_number = 0;
+        let mut df = Dataframe::default();
 
-        let mut records = Vec::new();
-        for result in reader.records() {
-            let record =
-                result.map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
-            records.push(record.iter().map(String::from).collect());
+        for row in reader.lines() {
+            let row = row.expect("Failed To Read Line");
+
+            if is_header {
+                let pat = self.delimiter.to_string();
+                df.columns = row.split(&pat).map(String::from).collect();
+                is_header = false;
+            } else {
+                let pat = self.delimiter.to_string();
+                let row_data: Vec<String> = row.split(&pat).map(String::from).collect();
+                df.rows.push(row_data);
+                row_number += 1;
+            }
         }
-
-        Ok(records)
-
-    }
-
-    fn columns(&self, _py: Python) -> PyResult <Vec<String>> {
-        let file = std::fs::File::open(&self.file_path)
-        .map_err(|e| pyo3::exceptions::PyIOError::new_err(e.to_string()))?;
-        
-        let mut reader = ReaderBuilder::new()
-        .has_headers(self.has_headers)
-        .delimiter(self.delimiter)
-        .from_reader(BufReader::new(file));
-
-        let headers = reader.headers()
-        .map_err(|e| pyo3::exceptions::PyIOError::new_err(e.to_string()))?;
-        
-        Ok(headers.iter().map(String::from).collect())
+        df
     }
 }
 
