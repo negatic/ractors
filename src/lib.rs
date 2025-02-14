@@ -54,12 +54,22 @@ struct CSV {
     delimiter: String,
 }
 
-impl Default for Dataframe {
+#[pymethods]
+impl Dataframe {
+    #[staticmethod]
     fn default() -> Self {
         Dataframe {
             columns: Vec::new(),
             rows: Vec::new()
         }
+    }
+
+    fn get_columns(&self) -> &Vec<String> {
+        &self.columns
+    }
+
+    fn get_rows(&self) -> &Vec<Vec<String>> {
+        &self.rows
     }
 }
 
@@ -73,23 +83,26 @@ impl CSV {
     fn read(&mut self) -> Dataframe {
         let file = std::fs::File::open(self.file_path.to_string()).unwrap();
         let reader = BufReader::new(file);
-        let mut is_header = false;
+        let mut is_header = true;
         let mut _row_number = 0;
         let mut df = Dataframe::default();
 
         for row in reader.lines() {
             let row = row.expect("Failed To Read Line");
 
-            if is_header {
+            if row.is_empty() {
+                break
+            } else if is_header {
                 let pat = self.delimiter.to_string();
                 df.columns = row.split(&pat).map(String::from).collect();
-                is_header = false;
+            
             } else {
                 let pat = self.delimiter.to_string();
                 let row_data: Vec<String> = row.split(&pat).map(String::from).collect();
                 df.rows.push(row_data);
                 _row_number += 1;
             }
+            is_header = false;
         }
         df
     }
