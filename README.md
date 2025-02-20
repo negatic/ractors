@@ -14,3 +14,19 @@ Ractors is a lightweight Python library designed for efficient array operations,
 
 You can install Ractors via pip:
 
+## Building the Package
+
+To build the package, you will need to install **Maturin**, a tool for building and publishing Rust-based Python packages.
+
+### Step 1: Install Maturin
+
+You can install Maturin using pip. Run the following command in your terminal:
+
+`pip install maturin`
+
+
+### Step 2: Build the Package
+
+Once Maturin is installed, you can build the package by running:
+
+`maturin develop`
