@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use std::io::{BufRead, BufReader};
+use std::{io::{BufRead, BufReader}, usize};
 
 #[pyfunction]
 fn mean(numbers: Vec<f64>) -> f64 {
@@ -64,12 +64,32 @@ impl Dataframe {
         }
     }
 
-    fn get_columns(&self) -> &Vec<String> {
+    fn headers(&self) -> &Vec<String> {
         &self.columns
     }
 
-    fn get_rows(&self) -> &Vec<Vec<String>> {
+    fn rows(&self) -> &Vec<Vec<String>> {
         &self.rows
+    }
+
+    fn column_values_from_index(&self, column_index: usize) -> Vec<String> {
+        let mut result = <Vec<String>>::new();
+
+        for (_, row) in self.rows().iter().enumerate() {
+            if row.len() > column_index {
+                result.push(row[column_index].clone());
+            }
+        }
+
+        result
+        
+    }
+
+    fn get_column_values(&self, column_name: String) -> Vec<String> {
+        match &self.columns.iter().position(|x| x == &column_name) {
+            Some(index) => self.column_values_from_index(*index),
+            None => return Vec::new()
+        }
     }
 }
 
